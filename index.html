@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>My Helper</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1a73e8"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<meta name="apple-mobile-web-app-title" content="My Helper"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f2f5;color:#222;min-height:100vh}
+header{background:#fff;border-bottom:2px solid #e0e0e0;padding:14px 20px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,0.07)}
+header h1{font-size:22px;font-weight:800;color:#1a73e8}
+header span{font-size:13px;color:#888}
+.layout{display:flex;min-height:calc(100vh - 57px)}
+.sidebar{width:220px;background:#fff;border-right:1px solid #e0e0e0;padding:16px 0;flex-shrink:0;position:sticky;top:57px;height:calc(100vh - 57px);overflow-y:auto}
+.cat-label{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;padding:10px 18px 4px}
+.nav-btn{display:flex;align-items:center;gap:9px;width:100%;padding:9px 18px;border:none;background:none;cursor:pointer;font-size:13.5px;color:#444;text-align:left;border-left:3px solid transparent;transition:all 0.15s}
+.nav-btn:hover{background:#f0f4ff;color:#1a73e8}
+.nav-btn.active{background:#e8f0fe;color:#1a73e8;border-left-color:#1a73e8;font-weight:600}
+.nav-btn .icon{font-size:17px;width:22px;text-align:center}
+.main{flex:1;padding:24px 20px;max-width:700px}
+.tool-card{background:#fff;border-radius:12px;padding:24px;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.tool-title{font-size:19px;font-weight:700;margin-bottom:4px;color:#1a1a1a}
+.tool-desc{font-size:13px;color:#888;margin-bottom:20px}
+.upload-area{border:2px dashed #c5d8ff;border-radius:10px;padding:28px;text-align:center;cursor:pointer;background:#f7f9ff;transition:border-color 0.2s;position:relative}
+.upload-area:hover{border-color:#1a73e8;background:#eef3ff}
+.upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.upload-area .uicon{font-size:32px}
+.upload-area p{font-size:13px;color:#666;margin-top:6px}
+.upload-area .hint{font-size:11px;color:#aaa;margin-top:3px}
+.preview-img{max-height:160px;max-width:100%;border-radius:8px;margin-top:8px;display:block;margin-left:auto;margin-right:auto}
+.row{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:110px}
+.field label{font-size:12px;font-weight:600;color:#555}
+.field input[type=number],.field input[type=text],.field select{border:1px solid #ddd;border-radius:7px;padding:8px 10px;font-size:14px;outline:none;background:#fafafa;transition:border-color 0.15s}
+.field input:focus,.field select:focus{border-color:#1a73e8;background:#fff}
+.field input[type=range]{accent-color:#1a73e8;width:100%;margin-top:4px}
+.field input[type=color]{height:36px;border:1px solid #ddd;border-radius:7px;cursor:pointer;width:100%}
+.btn{border:none;border-radius:8px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.btn-primary{background:#1a73e8;color:#fff}
+.btn-primary:hover{background:#1558b0}
+.btn-primary:disabled{background:#a0bef5;cursor:not-allowed}
+.btn-secondary{background:#f0f4ff;color:#1a73e8;border:1px solid #c5d8ff}
+.btn-secondary:hover{background:#e0eaff}
+.btn-danger{background:#fef2f2;color:#dc2626;border:1px solid #fecaca}
+.status{margin-top:12px;font-size:13px;padding:8px 12px;border-radius:7px;display:none}
+.status.ok{background:#f0fdf4;color:#16a34a;display:block}
+.status.err{background:#fef2f2;color:#dc2626;display:block}
+.status.info{background:#eff6ff;color:#1a73e8;display:block}
+.thumb-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.thumb-item{position:relative;width:72px}
+.thumb-item img{width:72px;height:72px;object-fit:cover;border-radius:7px;border:1px solid #e0e0e0}
+.thumb-item .rm{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.55);color:#fff;border:none;border-radius:50%;width:18px;height:18px;font-size:10px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.thumb-item span{display:block;font-size:10px;color:#888;text-align:center;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.result-box{margin-top:16px;padding:12px;background:#f7f9ff;border-radius:8px;border:1px solid #dde8ff}
+.result-box p{font-size:13px;color:#555;margin-bottom:8px}
+.lock-btn{background:#f0f4ff;border:1px solid #c5d8ff;border-radius:7px;padding:8px 10px;font-size:16px;cursor:pointer;margin-bottom:2px}
+.page-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.page-item{text-align:center;cursor:pointer}
+.page-item img{width:80px;height:100px;object-fit:cover;border-radius:6px;border:1px solid #e0e0e0;display:block}
+.page-item span{font-size:11px;color:#888;margin-top:2px;display:block}
+.checkerboard{background:repeating-conic-gradient(#ddd 0% 25%,#fff 0% 50%) 0 0/20px 20px;border-radius:8px;padding:6px;display:inline-block}
+.passport-sizes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.psize-btn{padding:6px 12px;border:1px solid #ddd;border-radius:6px;font-size:12px;cursor:pointer;background:#fafafa}
+.psize-btn.sel{background:#e8f0fe;border-color:#1a73e8;color:#1a73e8;font-weight:600}
+.tool-hidden{display:none}
+@media(max-width:600px){.sidebar{width:100%;height:auto;position:static;border-right:none;border-bottom:1px solid #e0e0e0;display:flex;flex-wrap:wrap;padding:8px}.layout{flex-direction:column}.cat-label{display:none}.nav-btn{width:auto;border-left:none;border-bottom:3px solid transparent;padding:7px 12px;font-size:12px}.nav-btn.active{border-bottom-color:#1a73e8;border-left-color:transparent}.main{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <div style="font-size:26px">🛠️</div>
+  <div>
+    <h1>My Helper</h1>
+    <span>Photo &amp; PDF Tools — 100% Local, No Upload</span>
+  </div>
+</header>
+<div class="layout">
+  <nav class="sidebar">
+    <div class="cat-label">🖼️ Image Tools</div>
+    <button class="nav-btn active" onclick="showTool('resize')"><span class="icon">⇲</span>Photo Resize</button>
+    <button class="nav-btn" onclick="showTool('compress')"><span class="icon">📦</span>File Size Reducer</button>
+    <button class="nav-btn" onclick="showTool('bgremove')"><span class="icon">✂️</span>BG Remove</button>
+    <button class="nav-btn" onclick="showTool('crop')"><span class="icon">🔲</span>Image Crop</button>
+    <button class="nav-btn" onclick="showTool('rotate')"><span class="icon">🔄</span>Rotate / Flip</button>
+    <button class="nav-btn" onclick="showTool('watermark')"><span class="icon">💧</span>Add Watermark</button>
+    <button class="nav-btn" onclick="showTool('convert')"><span class="icon">🔀</span>Format Converter</button>
+    <button class="nav-btn" onclick="showTool('textimg')"><span class="icon">✏️</span>Add Text on Image</button>
+    <button class="nav-btn" onclick="showTool('scanfix')"><span class="icon">📷</span>Scan Enhancer</button>
+    <button class="nav-btn" onclick="showTool('passport')"><span class="icon">🪪</span>Passport Photo</button>
+    <div class="cat-label">📄 PDF Tools</div>
+    <button class="nav-btn" onclick="showTool('jpg2pdf')"><span class="icon">📄</span>JPG → PDF</button>
+    <button class="nav-btn" onclick="showTool('pdf2jpg')"><span class="icon">🖼️</span>PDF → JPG</button>
+    <button class="nav-btn" onclick="showTool('mergepdf')"><span class="icon">🗂️</span>Merge PDFs</button>
+    <button class="nav-btn" onclick="showTool('splitpdf')"><span class="icon">✂️</span>Split PDF</button>
+    <button class="nav-btn" onclick="showTool('compresspdf')"><span class="icon">📦</span>Compress PDF</button>
+    <div class="cat-label">🔧 Utility</div>
+    <button class="nav-btn" onclick="showTool('rename')"><span class="icon">🏷️</span>Bulk Rename</button>
+    <button class="nav-btn" onclick="showTool('screenshot')"><span class="icon">📸</span>Screen Capture</button>
+  </nav>
+  <main class="main">
+
+    <!-- RESIZE -->
+    <div id="tool-resize" class="tool-card">
+      <div class="tool-title">⇲ Photo Resize</div>
+      <div class="tool-desc">Change image dimensions. Lock ratio to avoid distortion.</div>
+      <div class="upload-area" id="resize-drop">
+        <input type="file" accept="image/*" onchange="resizeLoad(this)"/>
+        <div class="uicon">🖼️</div>
+        <p>Click or drag image here</p>
+        <div class="hint">JPG, PNG, WebP supported</div>
+      </div>
+      <img id="resize-preview" class="preview-img" style="display:none"/>
+      <div class="row" id="resize-controls" style="display:none">
+        <div class="field"><label>Width (px)</label><input type="number" id="rw" oninput="resizeLock('w')"/></div>
+        <button class="lock-btn" id="lock-btn" onclick="toggleLock()" title="Lock aspect ratio">🔒</button>
+        <div class="field"><label>Height (px)</label><input type="number" id="rh" oninput="resizeLock('h')"/></div>
+      </div>
+      <div class="row" id="resize-controls2" style="display:none">
+        <div class="field"><label>Format</label>
+          <select id="rfmt"><option value="jpeg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select>
+        </div>
+        <div class="field"><label>Quality: <span id="rq-val">90</span>%</label>
+          <input type="range" min="10" max="100" value="90" id="rquality" oninput="document.getElementById('rq-val').textContent=this.value"/>
+        </div>
+        <button class="btn btn-primary" onclick="doResize()">⇲ Resize & Download</button>
+      </div>
+      <div id="resize-orig" style="font-size:12px;color:#aaa;margin-top:6px"></div>
+      <div class="status" id="resize-status"></div>
+      <canvas id="resize-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- COMPRESS IMAGE -->
+    <div id="tool-compress" class="tool-card tool-hidden">
+      <div class="tool-title">📦 File Size Reducer</div>
+      <div class="tool-desc">Reduce image file size by adjusting quality. No dimension change.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="compressLoad(this)"/>
+        <div class="uicon">📦</div>
+        <p>Click or drag image here</p>
+      </div>
+      <img id="compress-preview" class="preview-img" style="display:none"/>
+      <div id="compress-controls" style="display:none;margin-top:14px">
+        <div class="field"><label>Quality: <span id="cq-val">70</span>%  — lower = smaller file</label>
+          <input type="range" min="5" max="95" value="70" id="cquality" oninput="document.getElementById('cq-val').textContent=this.value;compressPreview()"/>
+        </div>
+        <div id="compress-sizes" style="font-size:12px;color:#888;margin-top:6px"></div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-primary" onclick="doCompress()">📦 Download Compressed</button>
+        </div>
+      </div>
+      <div class="status" id="compress-status"></div>
+      <canvas id="compress-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- BG REMOVE -->
+    <div id="tool-bgremove" class="tool-card tool-hidden">
+      <div class="tool-title">✂️ Background Remove</div>
+      <div class="tool-desc">Remove background from photos locally using colour sampling. Works best with solid/uniform backgrounds.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="bgLoad(this)"/>
+        <div class="uicon">✂️</div>
+        <p>Click or drag image here</p>
+      </div>
+      <img id="bg-preview" class="preview-img" style="display:none"/>
+      <div id="bg-controls" style="display:none;margin-top:14px">
+        <div class="field"><label>Tolerance (higher = remove more): <span id="bg-tol-val">40</span></label>
+          <input type="range" min="5" max="120" value="40" id="bg-tol" oninput="document.getElementById('bg-tol-val').textContent=this.value"/>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-primary" onclick="doBgRemove()">✂️ Remove Background</button>
+        </div>
+      </div>
+      <div id="bg-result" style="margin-top:14px;display:none;text-align:center">
+        <div class="checkerboard"><img id="bg-out" style="max-height:200px;max-width:100%;display:block"/></div>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="bgDownload()">⬇ Download PNG</button>
+      </div>
+      <div class="status" id="bg-status"></div>
+      <canvas id="bg-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- CROP -->
+    <div id="tool-crop" class="tool-card tool-hidden">
+      <div class="tool-title">🔲 Image Crop</div>
+      <div class="tool-desc">Crop image by specifying X, Y, Width, Height in pixels.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="cropLoad(this)"/>
+        <div class="uicon">🔲</div>
+        <p>Click or drag image here</p>
+      </div>
+      <img id="crop-preview" class="preview-img" style="display:none"/>
+      <div id="crop-controls" style="display:none;margin-top:14px">
+        <div id="crop-orig-info" style="font-size:12px;color:#aaa;margin-bottom:8px"></div>
+        <div class="row">
+          <div class="field"><label>X (px)</label><input type="number" id="crop-x" value="0"/></div>
+          <div class="field"><label>Y (px)</label><input type="number" id="crop-y" value="0"/></div>
+          <div class="field"><label>Width (px)</label><input type="number" id="crop-w"/></div>
+          <div class="field"><label>Height (px)</label><input type="number" id="crop-h"/></div>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label>Format</label>
+            <select id="crop-fmt"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
+          </div>
+          <button class="btn btn-primary" onclick="doCrop()">🔲 Crop & Download</button>
+        </div>
+      </div>
+      <div class="status" id="crop-status"></div>
+      <canvas id="crop-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- ROTATE/FLIP -->
+    <div id="tool-rotate" class="tool-card tool-hidden">
+      <div class="tool-title">🔄 Rotate / Flip</div>
+      <div class="tool-desc">Rotate image 90°/180°/270° or flip horizontally/vertically.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="rotateLoad(this)"/>
+        <div class="uicon">🔄</div>
+        <p>Click or drag image here</p>
+      </div>
+      <img id="rotate-preview" class="preview-img" style="display:none"/>
+      <div id="rotate-controls" style="display:none;margin-top:14px">
+        <div style="display:flex;flex-wrap:wrap;gap:8px">
+          <button class="btn btn-secondary" onclick="doRotate(90)">↻ 90°</button>
+          <button class="btn btn-secondary" onclick="doRotate(180)">↻ 180°</button>
+          <button class="btn btn-secondary" onclick="doRotate(270)">↺ 270°</button>
+          <button class="btn btn-secondary" onclick="doFlip('h')">⇔ Flip H</button>
+          <button class="btn btn-secondary" onclick="doFlip('v')">⇕ Flip V</button>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label>Format</label>
+            <select id="rotate-fmt"><option value="jpeg">JPG</option><option value="png">PNG</option></select>
+          </div>
+          <button class="btn btn-primary" onclick="doRotateDownload()">⬇ Download</button>
+        </div>
+      </div>
+      <div class="status" id="rotate-status"></div>
+      <canvas id="rotate-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- WATERMARK -->
+    <div id="tool-watermark" class="tool-card tool-hidden">
+      <div class="tool-title">💧 Add Watermark</div>
+      <div class="tool-desc">Add text watermark to your image with custom position, color and opacity.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="wmLoad(this)"/>
+        <div class="uicon">💧</div>
+        <p>Click or drag image here</p>
+      </div>
+      <img id="wm-preview" class="preview-img" style="display:none"/>
+      <div id="wm-controls" style="display:none;margin-top:14px">
+        <div class="row">
+          <div class="field" style="flex:2"><label>Watermark Text</label><input type="text" id="wm-text" value="© My Helper" placeholder="Enter watermark text"/></div>
+          <div class="field"><label>Color</label><input type="color" id="wm-color" value="#ffffff"/></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Font Size: <span id="wm-fs-val">36</span>px</label>
+            <input type="range" min="10" max="120" value="36" id="wm-fontsize" oninput="document.getElementById('wm-fs-val').textContent=this.value"/>
+          </div>
+          <div class="field"><label>Opacity: <span id="wm-op-val">60</span>%</label>
+            <input type="range" min="10" max="100" value="60" id="wm-opacity" oninput="document.getElementById('wm-op-val').textContent=this.value"/>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Position</label>
+            <select id="wm-pos">
+              <option value="center">Center</option>
+              <option value="tl">Top Left</option>
+              <option value="tr">Top Right</option>
+              <option value="bl">Bottom Left</option>
+              <option value="br">Bottom Right</option>
+              <option value="tile">Tile (repeat)</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="doWatermark()">💧 Apply & Download</button>
+        </div>
+      </div>
+      <div class="status" id="wm-status"></div>
+      <canvas id="wm-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- FORMAT CONVERTER -->
+    <div id="tool-convert" class="tool-card tool-hidden">
+      <div class="tool-title">🔀 Format Converter</div>
+      <div class="tool-desc">Convert images between JPG, PNG, WebP, BMP formats.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" multiple onchange="convertLoad(this)"/>
+        <div class="uicon">🔀</div>
+        <p>Click or drag images here (multiple allowed)</p>
+      </div>
+      <div id="convert-thumbs" class="thumb-grid"></div>
+      <div id="convert-controls" style="display:none;margin-top:14px">
+        <div class="row">
+          <div class="field"><label>Convert to</label>
+            <select id="conv-fmt"><option value="jpeg">JPG</option><option value="png">PNG</option><option value="webp">WebP</option></select>
+          </div>
+          <div class="field"><label>Quality: <span id="conv-q-val">90</span>%</label>
+            <input type="range" min="10" max="100" value="90" id="conv-quality" oninput="document.getElementById('conv-q-val').textContent=this.value"/>
+          </div>
+          <button class="btn btn-primary" onclick="doConvert()">🔀 Convert All & Download</button>
+        </div>
+      </div>
+      <div class="status" id="convert-status"></div>
+    </div>
+
+    <!-- ADD TEXT ON IMAGE -->
+    <div id="tool-textimg" class="tool-card tool-hidden">
+      <div class="tool-title">✏️ Add Text on Image</div>
+      <div class="tool-desc">Write custom text on your photo with font, color, size and position control.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="textImgLoad(this)"/>
+        <div class="uicon">✏️</div>
+        <p>Click or drag image here</p>
+      </div>
+      <div id="textimg-controls" style="display:none;margin-top:14px">
+        <div class="row">
+          <div class="field" style="flex:2"><label>Text</label><input type="text" id="ti-text" value="My Text" placeholder="Enter text"/></div>
+          <div class="field"><label>Color</label><input type="color" id="ti-color" value="#ffffff"/></div>
+        </div>
+        <div class="row">
+          <div class="field"><label>Font Size: <span id="ti-fs-val">40</span>px</label>
+            <input type="range" min="10" max="200" value="40" id="ti-fontsize" oninput="document.getElementById('ti-fs-val').textContent=this.value;textImgPreview()"/>
+          </div>
+          <div class="field"><label>Font Style</label>
+            <select id="ti-style" onchange="textImgPreview()">
+              <option value="normal">Normal</option>
+              <option value="bold">Bold</option>
+              <option value="italic">Italic</option>
+              <option value="bold italic">Bold Italic</option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <div class="field"><label>X Position (px)</label><input type="number" id="ti-x" value="50" oninput="textImgPreview()"/></div>
+          <div class="field"><label>Y Position (px)</label><input type="number" id="ti-y" value="50" oninput="textImgPreview()"/></div>
+          <div class="field"><label>Stroke Color</label><input type="color" id="ti-stroke" value="#000000"/></div>
+        </div>
+        <button class="btn btn-secondary" style="margin-top:8px" onclick="textImgPreview()">👁 Preview</button>
+        <div id="textimg-preview-wrap" style="margin-top:10px;display:none;text-align:center">
+          <img id="textimg-preview-out" style="max-width:100%;max-height:220px;border-radius:8px"/>
+        </div>
+        <div class="row" style="margin-top:10px">
+          <button class="btn btn-primary" onclick="doTextImg()">✏️ Download with Text</button>
+        </div>
+      </div>
+      <div class="status" id="textimg-status"></div>
+      <canvas id="textimg-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- SCAN ENHANCER -->
+    <div id="tool-scanfix" class="tool-card tool-hidden">
+      <div class="tool-title">📷 Document Scan Enhancer</div>
+      <div class="tool-desc">Improve scanned document quality — adjust brightness, contrast, and sharpness.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="scanLoad(this)"/>
+        <div class="uicon">📷</div>
+        <p>Click or drag scanned image here</p>
+      </div>
+      <div id="scan-controls" style="display:none;margin-top:14px">
+        <div class="field"><label>Brightness: <span id="scan-br-val">0</span></label>
+          <input type="range" min="-100" max="100" value="0" id="scan-br" oninput="document.getElementById('scan-br-val').textContent=this.value;scanPreview()"/>
+        </div>
+        <div class="field" style="margin-top:10px"><label>Contrast: <span id="scan-con-val">0</span></label>
+          <input type="range" min="-100" max="100" value="0" id="scan-con" oninput="document.getElementById('scan-con-val').textContent=this.value;scanPreview()"/>
+        </div>
+        <div class="field" style="margin-top:10px"><label>Sharpen: <span id="scan-sh-val">0</span></label>
+          <input type="range" min="0" max="5" step="0.5" value="0" id="scan-sh" oninput="document.getElementById('scan-sh-val').textContent=this.value;scanPreview()"/>
+        </div>
+        <div id="scan-preview-wrap" style="margin-top:12px;display:none;text-align:center">
+          <img id="scan-preview-out" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid #e0e0e0"/>
+        </div>
+        <div class="row" style="margin-top:12px">
+          <button class="btn btn-secondary" onclick="scanPreview()">👁 Preview</button>
+          <button class="btn btn-primary" onclick="doScan()">📷 Download Enhanced</button>
+        </div>
+      </div>
+      <div class="status" id="scan-status"></div>
+      <canvas id="scan-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- PASSPORT PHOTO -->
+    <div id="tool-passport" class="tool-card tool-hidden">
+      <div class="tool-title">🪪 Passport Size Photo Maker</div>
+      <div class="tool-desc">Create standard passport/ID size photos ready to print.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" onchange="passportLoad(this)"/>
+        <div class="uicon">🪪</div>
+        <p>Click or drag photo here</p>
+      </div>
+      <img id="passport-preview" class="preview-img" style="display:none"/>
+      <div id="passport-controls" style="display:none;margin-top:14px">
+        <div style="font-size:12px;font-weight:600;color:#555;margin-bottom:6px">Select Size:</div>
+        <div class="passport-sizes">
+          <button class="psize-btn sel" onclick="selectPSize(this,35,45)">India/UK 35×45mm</button>
+          <button class="psize-btn" onclick="selectPSize(this,51,51)">USA 51×51mm</button>
+          <button class="psize-btn" onclick="selectPSize(this,40,60)">China 40×60mm</button>
+          <button class="psize-btn" onclick="selectPSize(this,35,35)">Square 35×35mm</button>
+        </div>
+        <div id="psize-info" style="font-size:12px;color:#888;margin-top:6px">35 × 45 mm</div>
+        <div class="row" style="margin-top:10px">
+          <div class="field"><label>Background Color</label><input type="color" id="pp-bg" value="#ffffff"/></div>
+          <div class="field"><label>Copies on sheet</label>
+            <select id="pp-copies"><option value="1">1</option><option value="4" selected>4 (2×2)</option><option value="8">8 (2×4)</option></select>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="doPassport()">🪪 Generate & Download</button>
+      </div>
+      <div class="status" id="passport-status"></div>
+      <canvas id="passport-canvas" style="display:none"></canvas>
+    </div>
+
+    <!-- JPG TO PDF -->
+    <div id="tool-jpg2pdf" class="tool-card tool-hidden">
+      <div class="tool-title">📄 JPG → PDF</div>
+      <div class="tool-desc">Convert one or more images into a single PDF file.</div>
+      <div class="upload-area">
+        <input type="file" accept="image/*" multiple onchange="j2pLoad(this)"/>
+        <div class="uicon">📄</div>
+        <p>Click or drag images here (multiple allowed)</p>
+      </div>
+      <div id="j2p-thumbs" class="thumb-grid"></div>
+      <div id="j2p-controls" style="display:none;margin-top:14px">
+        <div class="row">
+          <div class="field"><label>Page Size</label>
+            <select id="j2p-size"><option value="a4">A4</option><option value="letter">Letter</option></select>
+          </div>
+          <div class="field"><label>Orientation</label>
+            <select id="j2p-orient"><option value="portrait">Portrait</option><option value="landscape">Landscape</option></select>
+          </div>
+          <button class="btn btn-primary" onclick="doJ2P()">📄 Build PDF</button>
+        </div>
+      </div>
+      <div class="status" id="j2p-status"></div>
+    </div>
+
+    <!-- PDF TO JPG -->
+    <div id="tool-pdf2jpg" class="tool-card tool-hidden">
+      <div class="tool-title">🖼️ PDF → JPG</div>
+      <div class="tool-desc">Convert each PDF page into a JPG image.</div>
+      <div class="upload-area">
+        <input type="file" accept="application/pdf" onchange="p2jLoad(this)"/>
+        <div class="uicon">🖼️</div>
+        <p>Click or drag PDF here</p>
+      </div>
+      <div id="p2j-controls" style="display:none;margin-top:14px">
+        <div class="field"><label>Resolution: <span id="p2j-scale-val">2</span>x (higher = better quality)</label>
+          <input type="range" min="1" max="4" step="0.5" value="2" id="p2j-scale" oninput="document.getElementById('p2j-scale-val').textContent=this.value"/>
+        </div>
+        <button class="btn btn-primary" style="margin-top:10px" onclick="doP2J()">🖼️ Convert Pages</button>
+      </div>
+      <div class="status" id="p2j-status"></div>
+      <div id="p2j-pages" class="page-list"></div>
+      <button id="p2j-dl-all" class="btn btn-secondary" style="display:none;margin-top:10px" onclick="p2jDownloadAll()">⬇ Download All Pages</button>
+    </div>
+
+    <!-- MERGE PDF -->
+    <div id="tool-mergepdf" class="tool-card tool-hidden">
+      <div class="tool-title">🗂️ Merge PDFs</div>
+      <div class="tool-desc">Combine multiple PDF files into one. Files merge in the order shown.</div>
+      <div class="upload-area">
+        <input type="file" accept="application/pdf" multiple onchange="mergeLoad(this)"/>
+        <div class="uicon">🗂️</div>
+        <p>Click or drag PDF files here (multiple)</p>
+      </div>
+      <div id="merge-list" style="margin-top:10px"></div>
+      <button id="merge-btn" class="btn btn-primary" style="display:none;margin-top:12px;width:100%" onclick="doMerge()">🗂️ Merge & Download</button>
+      <div class="status" id="merge-status"></div>
+    </div>
+
+    <!-- SPLIT PDF -->
+    <div id="tool-splitpdf" class="tool-card tool-hidden">
+      <div class="tool-title">✂️ Split PDF</div>
+      <div class="tool-desc">Split a PDF into individual pages, or extract a page range.</div>
+      <div class="upload-area">
+        <input type="file" accept="application/pdf" onchange="splitLoad(this)"/>
+        <div class="uicon">✂️</div>
+        <p>Click or drag PDF here</p>
+      </div>
+      <div id="split-controls" style="display:none;margin-top:14px">
+        <div id="split-info" style="font-size:13px;color:#555;margin-bottom:10px"></div>
+        <div class="row">
+          <div class="field"><label>Mode</label>
+            <select id="split-mode" onchange="splitModeChange()">
+              <option value="all">All pages (one file each)</option>
+              <option value="range">Page range</option>
+            </select>
+          </div>
+        </div>
+        <div id="split-range-fields" style="display:none">
+          <div class="row" style="margin-top:10px">
+            <div class="field"><label>From Page</label><input type="number" id="split-from" value="1" min="1"/></div>
+            <div class="field"><label>To Page</label><input type="number" id="split-to" value="1" min="1"/></div>
+          </div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="doSplit()">✂️ Split & Download</button>
+      </div>
+      <div class="status" id="split-status"></div>
+    </div>
+
+    <!-- COMPRESS PDF -->
+    <div id="tool-compresspdf" class="tool-card tool-hidden">
+      <div class="tool-title">📦 Compress PDF</div>
+      <div class="tool-desc">Reduce PDF size by re-rendering pages at lower resolution.</div>
+      <div class="upload-area">
+        <input type="file" accept="application/pdf" onchange="compPdfLoad(this)"/>
+        <div class="uicon">📦</div>
+        <p>Click or drag PDF here</p>
+      </div>
+      <div id="compresspdf-controls" style="display:none;margin-top:14px">
+        <div class="field"><label>Render Scale (lower = smaller file): <span id="cpdf-scale-val">1.5</span>x</label>
+          <input type="range" min="0.5" max="3" step="0.5" value="1.5" id="cpdf-scale" oninput="document.getElementById('cpdf-scale-val').textContent=this.value"/>
+        </div>
+        <div class="field" style="margin-top:10px"><label>Image Quality: <span id="cpdf-q-val">70</span>%</label>
+          <input type="range" min="20" max="95" value="70" id="cpdf-quality" oninput="document.getElementById('cpdf-q-val').textContent=this.value"/>
+        </div>
+        <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="doCompressPdf()">📦 Compress & Download</button>
+      </div>
+      <div class="status" id="compresspdf-status"></div>
+    </div>
+
+    <!-- BULK RENAME -->
+    <div id="tool-rename" class="tool-card tool-hidden">
+      <div class="tool-title">🏷️ Bulk Rename</div>
+      <div class="tool-desc">Rename multiple files with a custom prefix and sequential numbering. Files are renamed and downloaded as a ZIP.</div>
+      <div class="upload-area">
+        <input type="file" multiple onchange="renameLoad(this)"/>
+        <div class="uicon">🏷️</div>
+        <p>Click or drag files here (any type)</p>
+      </div>
+      <div id="rename-controls" style="display:none;margin-top:14px">
+        <div class="row">
+          <div class="field"><label>Prefix</label><input type="text" id="rename-prefix" value="file_" placeholder="e.g. photo_"/></div>
+          <div class="field"><label>Start Number</label><input type="number" id="rename-start" value="1" min="0"/></div>
+          <div class="field"><label>Padding (digits)</label><input type="number" id="rename-pad" value="3" min="1" max="6"/></div>
+        </div>
+        <div id="rename-preview" style="font-size:12px;color:#555;margin-top:10px;background:#f7f9ff;padding:10px;border-radius:7px;line-height:1.8"></div>
+        <button class="btn btn-primary" style="margin-top:10px;width:100%" onclick="doRename()">🏷️ Download Renamed ZIP</button>
+      </div>
+      <div class="status" id="rename-status"></div>
+    </div>
+
+    <!-- SCREEN CAPTURE -->
+    <div id="tool-screenshot" class="tool-card tool-hidden">
+      <div class="tool-title">📸 Screen Capture</div>
+      <div class="tool-desc">Capture your screen, a window, or a browser tab and save as PNG.</div>
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:48px;margin-bottom:12px">📸</div>
+        <p style="color:#666;font-size:14px;margin-bottom:16px">Click the button below to start screen capture. Browser will ask for permission.</p>
+        <button class="btn btn-primary" onclick="doScreenCapture()">📸 Capture Screen</button>
+      </div>
+      <div id="screenshot-result" style="display:none;text-align:center;margin-top:14px">
+        <img id="screenshot-out" style="max-width:100%;max-height:220px;border-radius:8px;border:1px solid #e0e0e0;display:block;margin:0 auto"/>
+        <button class="btn btn-secondary" style="margin-top:10px" onclick="screenshotDownload()">⬇ Download PNG</button>
+      </div>
+      <div class="status" id="screenshot-status"></div>
+    </div>
+
+  </main>
+</div>
+
+<!-- CDN Libraries loaded on demand -->
+<script>
+// ─── GLOBAL STATE ───────────────────────────────────────────────────────────
+const state = {
+  resizeImg: null, resizeW: 0, resizeH: 0, resizeLocked: true,
+  compressImg: null, compressOrigSize: 0,
+  bgImg: null,
+  cropImg: null,
+  rotateImg: null, rotateAngle: 0, rotateFlipH: false, rotateFlipV: false,
+  wmImg: null,
+  convertImgs: [],
+  textImg: null,
+  scanImg: null,
+  passportImg: null, passportW: 35, passportH: 45,
+  j2pImgs: [],
+  p2jPages: [],
+  mergeFiles: [],
+  splitFile: null, splitPageCount: 0,
+  compPdfFile: null,
+  renameFiles: [],
+  screenshotData: null,
+};
+
+// ─── NAVIGATION ─────────────────────────────────────────────────────────────
+function showTool(id) {
+  document.querySelectorAll('.tool-card').forEach(el => el.classList.add('tool-hidden'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tool-' + id).classList.remove('tool-hidden');
+  event.currentTarget.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ─── HELPERS ────────────────────────────────────────────────────────────────
+function readAsDataURL(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(file); });
+}
+function readAsArrayBuffer(file) {
+  return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsArrayBuffer(file); });
+}
+function loadImage(src) {
+  return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = src; });
+}
+function dlDataURL(url, name) { const a = document.createElement('a'); a.href = url; a.download = name; a.click(); }
+function dlBlob(blob, name) { dlDataURL(URL.createObjectURL(blob), name); }
+function setStatus(id, msg, type) {
+  const el = document.getElementById(id); el.textContent = msg; el.className = 'status ' + type;
+}
+function fmtBytes(b) { if (b < 1024) return b + ' B'; if (b < 1048576) return (b/1024).toFixed(1) + ' KB'; return (b/1048576).toFixed(2) + ' MB'; }
+
+function loadScript(url) {
+  return new Promise((res, rej) => {
+    if (document.querySelector(`script[src="${url}"]`)) { res(); return; }
+    const s = document.createElement('script'); s.src = url; s.onload = res; s.onerror = rej; document.head.appendChild(s);
+  });
+}
+async function getJsPDF() {
+  if (!window.jspdf) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
+  return window.jspdf.jsPDF;
+}
+async function getPdfJs() {
+  if (!window.pdfjsLib) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  return window.pdfjsLib;
+}
+async function getPdfLib() {
+  if (!window.PDFLib) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js');
+  return window.PDFLib;
+}
+async function getJSZip() {
+  if (!window.JSZip) await loadScript('https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js');
+  return window.JSZip;
+}
+
+// ─── RESIZE ──────────────────────────────────────────────────────────────────
+async function resizeLoad(input) {
+  const file = input.files[0]; if (!file) return;
+  const url = await readAsDataURL(file);
+  const img = await loadImage(url);
+  state.resizeImg = url; state.resizeW = img.width; state.resizeH = img.height; state.resizeLocked = true;
+  document.getElementById('resize-preview').src = url; document.getElementById('resize-preview').style.display = 'block';
+  document.getElementById('rw').value = img.width; document.getElementById('rh').value = img.height;
+  document.getElementById('resize-controls').style.display = 'flex';
+  document.getElementById('resize-controls2').style.display = 'flex';
+  document.getElementById('resize-orig').textContent = `Original: ${img.width} × ${img.height} px`;
+  document.getElementById('lock-btn').textContent = '🔒';
+}
+function toggleLock() {
+  state.resizeLocked = !state.resizeLocked;
+  document.getElementById('lock-btn').textContent = state.resizeLocked ? '🔒' : '🔓';
+}
+function resizeLock(changed) {
+  if (!state.resizeLocked) return;
+  const w = parseInt(document.getElementById('rw').value), h = parseInt(document.getElementById('rh').value);
+  if (changed === 'w' && state.resizeW) document.getElementById('rh').value = Math.round(w / state.resizeW * state.resizeH);
+  if (changed === 'h' && state.resizeH) document.getElementById('rw').value = Math.round(h / state.resizeH * state.resizeW);
+}
+async function doResize() {
+  if (!state.resizeImg) return;
+  const w = parseInt(document.getElementById('rw').value), h = parseInt(document.getElementById('rh').value);
+  const fmt = document.getElementById('rfmt').value, q = parseInt(document.getElementById('rquality').value) / 100;
+  const img = await loadImage(state.resizeImg);
+  const c = document.getElementById('resize-canvas'); c.width = w; c.height = h;
+  c.getContext('2d').drawImage(img, 0, 0, w, h);
+  dlDataURL(c.toDataURL('image/' + fmt, q), 'resized.' + (fmt === 'jpeg' ? 'jpg' : fmt));
+  setStatus('resize-status', '✅ Downloaded! ' + w + '×' + h + ' px', 'ok');
+}
+
+// ─── COMPRESS IMAGE ───────────────────────────────────────────────────────────
+async function compressLoad(input) {
+  const file = input.files[0]; if (!file) return;
+  state.compressOrigSize = file.size;
+  const url = await readAsDataURL(file);
+  state.compressImg = url;
+  document.getElementById('compress-preview').src = url; document.getElementById('compress-preview').style.display = 'block';
+  document.getElementById('compress-controls').style.display = 'block';
+  document.getElementById('compress-sizes').textContent = 'Original size: ' + fmtBytes(file.size);
+  compressPreview();
+}
+async function compressPreview() {
+  if (!state.compressImg) return;
+  const q = parseInt(document.getElementById('cquality').value) / 100;
+  const img = await loadImage(state.compressImg);
+  const c = document.getElementById('compress-canvas'); c.width = img.width; c.height = img.height;
+  c.getContext('2d').drawImage(img, 0, 0);
+  const out = c.toDataURL('image/jpeg', q);
+  const bytes = Math.round((out.length - 22) * 3 / 4);
+  document.getElementById('compress-sizes').textContent = `Original: ${fmtBytes(state.compressOrigSize)} → Estimated: ${fmtBytes(bytes)} (${Math.round(bytes/state.compressOrigSize*100)}%)`;
+}
+async function doCompress() {
+  if (!state.compressImg) return;
+  const q = parseInt(document.getElementById('cquality').value) / 100;
+  const img = await loadImage(state.compressImg);
+  const c = document.getElementById('compress-canvas'); c.width = img.width; c.height = img.height;
+  c.getContext('2d').drawImage(img, 0, 0);
+  dlDataURL(c.toDataURL('image/jpeg', q), 'compressed.jpg');
+  setStatus('compress-status', '✅ Compressed file downloaded!', 'ok');
+}
+
+// ─── BG REMOVE ────────────────────────────────────────────────────────────────
+async function bgLoad(input) {
+  const file = input.files[0]; if (!file) return;
+  const url = await readAsDataURL(file);
+  state.bgImg = url;
+  document.getElementById('bg-preview').src = url; document.getElementById('bg-preview').style.display = 'block';
+  document.getElementById('bg-controls').style.display = 'block';
+  document.getElementById('bg-result').style.display = 'none';
+}
+async function doBgRemove() {
+  if (!state.bgImg) return;
+  setStatus('bg-status', '⏳ Processing…', 'info');
+  const img = await loadImage(state.bgImg);
+  const c = document.getElementById('bg-canvas'); c.width = img.width; c.height = img.height;
+  const ctx = c.getContext('2d'); ctx.drawImage(img, 0, 0);
+  const id = ctx.getImageData(0, 0, c.width, c.height); const d = id.data;
+  const tol = parseInt(document.getElementById('bg-tol').value) * 3;
+  // Sample corners for background colour
+  const corners = [[0,0],[c.width-1,0],[0,c.height-1],[c.width-1,c.height-1]];
+  let bgR=0,bgG=0,bgB=0;
+  corners.forEach(([x,y])=>{ const i=(y*c.width+x)*4; bgR+=d[i];bgG+=d[i+1];bgB+=d[i+2]; });
+  bgR=Math.round(bgR/4);bgG=Math.round(bgG/4);bgB=Math.round(bgB/4);
+  for (let i=0;i<d.length;i+=4) {
+    if (Math.abs(d[i]-bgR)+Math.abs(d[i+1]-bgG)+Math.abs(d[i+2]-bgB) < tol) d[i+3]=0;
+  }
+  ctx.putImageData(id,0,0);
+  const out = c.toDataURL('image/png');
+  document.getElementById('bg-out').src = out;
+  document.getElementById('bg-result').style.display = 'block';
+  setStatus('bg-status','✅ Background removed! Adjust tolerance if needed.','ok');
+  window._bgOut = out;
+}
+function bgDownload() { if (window._bgOut) dlDataURL(window._bgOut, 'no-bg.png'); }
+
+// ─── CROP ─────────────────────────────────────────────────────────────────────
+async function cropLoad(input) {
+  const file = input.files[0]; if (!file) return;
+  const url = await readAsDataURL(file);
+  const img = await loadImage(url);
+  state.cropImg = url;
+  document.getElementById('crop-preview').src = url; document.getElementById('crop-preview').style.display = 'block';
+  document.getElementById('crop-controls').style.display = 'block';
+  document.getElementById('crop-orig-info').textContent = `Image size: ${img.width} × ${img.height} px`;
+  document.getElementById('crop-w').value = img.width; document.getElementById('crop-h').value = img.height;
+}
+async function doCrop() {
+  if (!state.cropImg) return;
+  const x=parseInt(document.getElementById('crop-x').value)||0, y=parseInt(document.getElementById('crop-y').value)||0;
+  const w=parseInt(document.getElementById('crop-w').value), h=parseInt(document.getElementById('crop-h').value);
+  const fmt = document.getElementById('crop-fmt').value;
+  const img = await loadImage(state.cropImg);
+  const c = document.getElementById('crop-canvas'); c.width=w; c.height=h;
+  c.getContext('2d').drawImage(img, x, y, w, h, 0, 0, w, h);
+  dlDataURL(c.toDataURL('image/'+fmt,0.92),'cropped.'+(fmt==='jpeg'?'jpg':fmt));
+  setStatus('crop-status','✅ Cropped image downloaded!','ok');
+}
+
+// ─── ROTATE/FLIP ──────────────────────────────────────────────────────────────
+async function rotateLoad(input) {
+  const file = input.files[0]; if (!file) return;
+  const url = await readAsDataURL(file);
+  state.rotateImg = url; state.rotateAngle = 0; state.rotateFlipH = false; state.rotateFlipV = false;
+  document.getElementById('rotate-preview').src = url; document.getElementById('rotate-preview').style.display = 'block';
+  document.getElementById('rotate-controls').style.display = 'block';
+  setStatus('rotate-status','','info'); document.getElementById('rotate-status').style.display='none';
+}
+function doRotate(deg) { state.rotateAngle = (state.rotateAngle + deg) % 360; renderRotatePreview(); }
+function doFlip(dir) { if(dir==='h') state.rotateFlipH=!state.rotateFlipH; else state.rotateFlipV=!state.rotateFlipV; renderRotatePreview(); }
+async function renderRotatePreview() {
+  if (!state.rotateImg) return;
+  const img = await loadImage(state.rotateImg);
+  const ang = state.rotateAngle * Math.PI / 180;
+  const sw = (state.rotateAngle%180===0)?img.width:img.height, sh = (state.rotateAngle%180===0)?img.height:img.width;
+  const c = document.getElementById('rotate-canvas'); c.width=sw; c.height=sh;
+  const ctx = c.getContext('2d');
+  ctx.translate(sw/2,sh/2); ctx.rotate(ang);
+  ctx.scale(state.rotateFlipH?-1:1, state.rotateFlipV?-1:1);
+  ctx.drawImage(img,-img.width/2,-img.height/2);
+  document.getElementById('rotate-preview').src = c.toDataURL('image/jpeg',0.9);
+  setStatus('rotate-status','Preview updated. Click Download when ready.','info');
+}
+async function doRotateDownload() {
+  if (!state.rotateImg) return;
+  const img = await loadImage(state.rotateImg);
+  const ang = state.rotateAngle * Math.PI / 180;
+  const sw=(state.rotateAngle%180===0)?img.width:img.height, sh=(state.rotateAngle%180===0)?img.height:img.width;
+  const c = document.getElementById('rotate-canvas'); c.width=sw; c.height=sh;
+  const ctx=c.getContext('2d');
+  ctx.translate(sw/2,sh/2); ctx.rotate(ang);
+  ctx.scale(state.rotateFlipH?-1:1,state.rotateFlipV?-1:1);
+  ctx.drawImage(img,-img.width/2,-img.height/2);
+  const fmt = document.getElementById('rotate-fmt').value;
+  dlDataURL(c.toDataURL('image/'+fmt,0.92),'rotated.'+(fmt==='jpeg'?'jpg':fmt));
+  setStatus('rotate-status','✅ Downloaded!','ok');
+}
+
+// ─── WATERMARK ────────────────────────────────────────────────────────────────
+async function wmLoad(input) {
+  const file = input.files[0]; if(!file) return;
+  const url = await readAsDataURL(file);
+  state.wmImg = url;
+  document.getElementById('wm-preview').src=url; document.getElementById('wm-preview').style.display='block';
+  document.getElementById('wm-controls').style.display='block';
+}
+async function doWatermark() {
+  if(!state.wmImg) return;
+  const img = await loadImage(state.wmImg);
+  const c = document.getElementById('wm-canvas'); c.width=img.width; c.height=img.height;
+  const ctx=c.getContext('2d'); ctx.drawImage(img,0,0);
+  const text=document.getElementById('wm-text').value||'Watermark';
+  const color=document.getElementById('wm-color').value;
+  const fs=parseInt(document.getElementById('wm-fontsize').value);
+  const op=parseInt(document.getElementById('wm-opacity').value)/100;
+  const pos=document.getElementById('wm-pos').value;
+  ctx.font=`${fs}px Arial`; ctx.fillStyle=color; ctx.globalAlpha=op;
+  const tw=ctx.measureText(text).width;
+  const pad=20;
+  if(pos==='center'){ctx.fillText(text,(img.width-tw)/2,(img.height+fs)/2);}
+  else if(pos==='tl'){ctx.fillText(text,pad,fs+pad);}
+  else if(pos==='tr'){ctx.fillText(text,img.width-tw-pad,fs+pad);}
+  else if(pos==='bl'){ctx.fillText(text,pad,img.height-pad);}
+  else if(pos==='br'){ctx.fillText(text,img.width-tw-pad,img.height-pad);}
+  else if(pos==='tile'){
+    for(let y=fs;y<img.height;y+=fs*3) for(let x=0;x<img.width;x+=tw+40) ctx.fillText(text,x,y);
+  }
+  ctx.globalAlpha=1;
+  dlDataURL(c.toDataURL('image/jpeg',0.92),'watermarked.jpg');
+  setStatus('wm-status','✅ Watermarked image downloaded!','ok');
+}
+
+// ─── FORMAT CONVERTER ─────────────────────────────────────────────────────────
+async function convertLoad(input) {
+  const files = Array.from(input.files); if(!files.length) return;
+  state.convertImgs = [];
+  const grid = document.getElementById('convert-thumbs'); grid.innerHTML='';
+  for(const f of files){
+    const url=await readAsDataURL(f);
+    state.convertImgs.push({url,name:f.name});
+    const d=document.createElement('div'); d.className='thumb-item';
+    d.innerHTML=`<img src="${url}"/><span>${f.name}</span>`;
+    grid.appendChild(d);
+  }
+  document.getElementById('convert-controls').style.display='block';
+}
+async function doConvert() {
+  if(!state.convertImgs.length) return;
+  const fmt=document.getElementById('conv-fmt').value;
+  const q=parseInt(document.getElementById('conv-quality').value)/100;
+  const ext=fmt==='jpeg'?'jpg':fmt;
+  setStatus('convert-status','⏳ Converting…','info');
+  for(const item of state.convertImgs){
+    const img=await loadImage(item.url);
+    const c=document.createElement('canvas'); c.width=img.width; c.height=img.height;
+    c.getContext('2d').drawImage(img,0,0);
+    const base=item.name.replace(/\.[^.]+$/,'');
+    dlDataURL(c.toDataURL('image/'+fmt,q),base+'.'+ext);
+    await new Promise(r=>setTimeout(r,300));
+  }
+  setStatus('convert-status',`✅ ${state.convertImgs.length} file(s) converted!`,'ok');
+}
+
+// ─── ADD TEXT ON IMAGE ────────────────────────────────────────────────────────
+async function textImgLoad(input) {
+  const file=input.files[0]; if(!file) return;
+  const url=await readAsDataURL(file);
+  state.textImg=url;
+  document.getElementById('textimg-controls').style.display='block';
+}
+async function textImgPreview() {
+  if(!state.textImg) return;
+  const img=await loadImage(state.textImg);
+  const c=document.getElementById('textimg-canvas'); c.width=img.width; c.height=img.height;
+  const ctx=c.getContext('2d'); ctx.drawImage(img,0,0);
+  const text=document.getElementById('ti-text').value||'';
+  const color=document.getElementById('ti-color').value;
+  const fs=parseInt(document.getElementById('ti-fontsize').value);
+  const style=document.getElementById('ti-style').value;
+  const x=parseInt(document.getElementById('ti-x').value)||0;
+  const y=parseInt(document.getElementById('ti-y').value)||0;
+  const stroke=document.getElementById('ti-stroke').value;
+  ctx.font=`${style} ${fs}px Arial`;
+  ctx.strokeStyle=stroke; ctx.lineWidth=2; ctx.strokeText(text,x,y);
+  ctx.fillStyle=color; ctx.fillText(text,x,y);
+  document.getElementById('textimg-preview-out').src=c.toDataURL('image/jpeg',0.9);
+  document.getElementById('textimg-preview-wrap').style.display='block';
+}
+async function doTextImg() {
+  await textImgPreview();
+  dlDataURL(document.getElementById('textimg-canvas').toDataURL('image/jpeg',0.92),'text-image.jpg');
+  setStatus('textimg-status','✅ Downloaded!','ok');
+}
+
+// ─── SCAN ENHANCER ────────────────────────────────────────────────────────────
+async function scanLoad(input) {
+  const file=input.files[0]; if(!file) return;
+  const url=await readAsDataURL(file);
+  state.scanImg=url;
+  document.getElementById('scan-controls').style.display='block';
+  setStatus('scan-status','','info'); document.getElementById('scan-status').style.display='none';
+}
+async function scanPreview() {
+  if(!state.scanImg) return;
+  const img=await loadImage(state.scanImg);
+  const c=document.getElementById('scan-canvas'); c.width=img.width; c.height=img.height;
+  const ctx=c.getContext('2d'); ctx.drawImage(img,0,0);
+  const br=parseInt(document.getElementById('scan-br').value);
+  const con=parseInt(document.getElementById('scan-con').value);
+  const sh=parseFloat(document.getElementById('scan-sh').value);
+  const id=ctx.getImageData(0,0,c.width,c.height); const d=id.data;
+  const factor=(259*(con+255))/(255*(259-con));
+  for(let i=0;i<d.length;i+=4){
+    d[i]=Math.min(255,Math.max(0,factor*(d[i]-128)+128+br));
+    d[i+1]=Math.min(255,Math.max(0,factor*(d[i+1]-128)+128+br));
+    d[i+2]=Math.min(255,Math.max(0,factor*(d[i+2]-128)+128+br));
+  }
+  ctx.putImageData(id,0,0);
+  // Sharpen
+  if(sh>0){
+    const amount=sh*0.5;
+    ctx.filter=`url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><filter id='s'><feConvolveMatrix order='3' kernelMatrix='0 -${amount} 0 -${amount} ${1+4*amount} -${amount} 0 -${amount} 0'/></filter></svg>#s")`;
+    const tmp=document.createElement('canvas'); tmp.width=c.width; tmp.height=c.height;
+    tmp.getContext('2d').drawImage(c,0,0);
+    ctx.filter='none'; ctx.drawImage(tmp,0,0);
+  }
+  document.getElementById('scan-preview-out').src=c.toDataURL('image/jpeg',0.95);
+  document.getElementById('scan-preview-wrap').style.display='block';
+}
+async function doScan() {
+  await scanPreview();
+  dlDataURL(document.getElementById('scan-canvas').toDataURL('image/jpeg',0.95),'enhanced-scan.jpg');
+  setStatus('scan-status','✅ Enhanced scan downloaded!','ok');
+}
+
+// ─── PASSPORT PHOTO ───────────────────────────────────────────────────────────
+async function passportLoad(input) {
+  const file=input.files[0]; if(!file) return;
+  const url=await readAsDataURL(file);
+  state.passportImg=url;
+  document.getElementById('passport-preview').src=url; document.getElementById('passport-preview').style.display='block';
+  document.getElementById('passport-controls').style.display='block';
+}
+function selectPSize(btn,w,h) {
+  document.querySelectorAll('.psize-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  state.passportW=w; state.passportH=h;
+  document.getElementById('psize-info').textContent=`${w} × ${h} mm`;
+}
+async function doPassport() {
+  if(!state.passportImg) return;
+  setStatus('passport-status','⏳ Generating…','info');
+  try {
+    const jsPDF=await getJsPDF();
+    const copies=parseInt(document.getElementById('pp-copies').value);
+    const bg=document.getElementById('pp-bg').value;
+    const mmW=state.passportW, mmH=state.passportH;
+    const DPI=300, MM2PX=DPI/25.4;
+    const pw=Math.round(mmW*MM2PX), ph=Math.round(mmH*MM2PX);
+    const img=await loadImage(state.passportImg);
+    // A4 at 300dpi = 2480x3508px → in mm = 210x297
+    const pageW=210, pageH=297; // mm
+    const pw_mm=mmW, ph_mm=mmH;
+    const cols=2, rows=Math.ceil(copies/cols);
+    const padX=(pageW-cols*pw_mm)/2, padY=20;
+    const pdf=new jsPDF({unit:'mm',format:'a4'});
+    // Fill background white
+    pdf.setFillColor(255,255,255); pdf.rect(0,0,pageW,pageH,'F');
+    // Render photo to canvas at desired px size
+    const c=document.createElement('canvas'); c.width=pw; c.height=ph;
+    const ctx=c.getContext('2d');
+    // Fill bg colour
+    ctx.fillStyle=bg; ctx.fillRect(0,0,pw,ph);
+    // Scale & center image
+    const ratio=Math.min(pw/img.width,ph/img.height);
+    const dw=img.width*ratio,dh=img.height*ratio;
+    ctx.drawImage(img,(pw-dw)/2,(ph-dh)/2,dw,dh);
+    const imgData=c.toDataURL('image/jpeg',0.95);
+    let n=0;
+    for(let r=0;r<rows&&n<copies;r++) for(let col=0;col<cols&&n<copies;col++,n++){
+      const x=padX+col*(pw_mm+4), y=padY+r*(ph_mm+4);
+      pdf.addImage(imgData,'JPEG',x,y,pw_mm,ph_mm);
+    }
+    pdf.save('passport-photos.pdf');
+    setStatus('passport-status','✅ PDF downloaded! Print at 100% scale.','ok');
+  } catch(e){ setStatus('passport-status','❌ '+e.message,'err'); }
+}
+
+// ─── JPG TO PDF ───────────────────────────────────────────────────────────────
+async function j2pLoad(input) {
+  const files=Array.from(input.files); if(!files.length) return;
+  state.j2pImgs=[];
+  const grid=document.getElementById('j2p-thumbs'); grid.innerHTML='';
+  for(const f of files){
+    const url=await readAsDataURL(f);
+    state.j2pImgs.push({url,name:f.name});
+    const d=document.createElement('div'); d.className='thumb-item';
+    d.innerHTML=`<img src="${url}"/><span>${f.name}</span>`;
+    grid.appendChild(d);
+  }
+  document.getElementById('j2p-controls').style.display='block';
+}
+async function doJ2P() {
+  if(!state.j2pImgs.length) return;
+  setStatus('j2p-status','⏳ Building PDF…','info');
+  try {
+    const jsPDF=await getJsPDF();
+    const size=document.getElementById('j2p-size').value;
+    const orient=document.getElementById('j2p-orient').value;
+    const pdf=new jsPDF({orientation:orient,unit:'pt',format:size});
+    const [pw,ph]=orient==='portrait'?(size==='a4'?[595,842]:[612,792]):(size==='a4'?[842,595]:[792,612]);
+    for(let i=0;i<state.j2pImgs.length;i++){
+      if(i>0) pdf.addPage();
+      const img=await loadImage(state.j2pImgs[i].url);
+      const r=Math.min(pw/img.width,ph/img.height);
+      const rw=img.width*r,rh=img.height*r;
+      const fmt=state.j2pImgs[i].url.startsWith('data:image/png')?'PNG':'JPEG';
+      pdf.addImage(state.j2pImgs[i].url,fmt,(pw-rw)/2,(ph-rh)/2,rw,rh);
+    }
+    pdf.save('images.pdf');
+    setStatus('j2p-status',`✅ PDF with ${state.j2pImgs.length} page(s) downloaded!`,'ok');
+  } catch(e){ setStatus('j2p-status','❌ '+e.message,'err'); }
+}
+
+// ─── PDF TO JPG ───────────────────────────────────────────────────────────────
+function p2jLoad(input) {
+  const file=input.files[0]; if(!file) return;
+  window._p2jFile=file;
+  document.getElementById('p2j-controls').style.display='block';
+  setStatus('p2j-status',`File loaded: ${file.name}`,'info');
+}
+async function doP2J() {
+  if(!window._p2jFile) return;
+  const scale=parseFloat(document.getElementById('p2j-scale').value);
+  setStatus('p2j-status','⏳ Rendering pages…','info');
+  document.getElementById('p2j-pages').innerHTML='';
+  document.getElementById('p2j-dl-all').style.display='none';
+  try {
+    const pdfjs=await getPdfJs();
+    const buf=await readAsArrayBuffer(window._p2jFile);
+    const pdf=await pdfjs.getDocument({data:buf}).promise;
+    state.p2jPages=[];
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const vp=page.getViewport({scale});
+      const c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      const url=c.toDataURL('image/jpeg',0.92);
+      state.p2jPages.push({url,label:`page_${i}.jpg`});
+      const d=document.createElement('div'); d.className='page-item';
+      d.onclick=(()=>{const u=url,l=`page_${i}.jpg`;return()=>dlDataURL(u,l);})();
+      d.innerHTML=`<img src="${url}"/><span>Page ${i}</span>`;
+      document.getElementById('p2j-pages').appendChild(d);
+    }
+    setStatus('p2j-status',`✅ ${pdf.numPages} page(s) rendered. Click a page or use Download All.`,'ok');
+    if(state.p2jPages.length>1) document.getElementById('p2j-dl-all').style.display='inline-block';
+  } catch(e){ setStatus('p2j-status','❌ '+e.message,'err'); }
+}
+function p2jDownloadAll() {
+  state.p2jPages.forEach((p,i)=>{ setTimeout(()=>dlDataURL(p.url,p.label),i*400); });
+}
+
+// ─── MERGE PDF ────────────────────────────────────────────────────────────────
+async function mergeLoad(input) {
+  state.mergeFiles=Array.from(input.files);
+  const list=document.getElementById('merge-list'); list.innerHTML='';
+  state.mergeFiles.forEach((f,i)=>{
+    const d=document.createElement('div');
+    d.style='padding:6px 10px;background:#f7f9ff;border-radius:6px;margin-bottom:6px;font-size:13px;color:#444';
+    d.textContent=`${i+1}. ${f.name} (${fmtBytes(f.size)})`;
+    list.appendChild(d);
+  });
+  document.getElementById('merge-btn').style.display=state.mergeFiles.length>1?'block':'none';
+  if(state.mergeFiles.length<2) setStatus('merge-status','Please select at least 2 PDF files.','err');
+  else { document.getElementById('merge-status').style.display='none'; }
+}
+async function doMerge() {
+  if(state.mergeFiles.length<2) return;
+  setStatus('merge-status','⏳ Merging…','info');
+  try {
+    const {PDFDocument}=await getPdfLib();
+    const merged=await PDFDocument.create();
+    for(const f of state.mergeFiles){
+      const buf=await readAsArrayBuffer(f);
+      const pdf=await PDFDocument.load(buf);
+      const pages=await merged.copyPages(pdf,pdf.getPageIndices());
+      pages.forEach(p=>merged.addPage(p));
+    }
+    const bytes=await merged.save();
+    dlBlob(new Blob([bytes],{type:'application/pdf'}),'merged.pdf');
+    setStatus('merge-status',`✅ Merged ${state.mergeFiles.length} PDFs!`,'ok');
+  } catch(e){ setStatus('merge-status','❌ '+e.message,'err'); }
+}
+
+// ─── SPLIT PDF ────────────────────────────────────────────────────────────────
+async function splitLoad(input) {
+  const file=input.files[0]; if(!file) return;
+  window._splitFile=file;
+  setStatus('split-status','⏳ Loading PDF…','info');
+  try {
+    const {PDFDocument}=await getPdfLib();
+    const buf=await readAsArrayBuffer(file);
+    const pdf=await PDFDocument.load(buf);
+    state.splitPageCount=pdf.getPageCount();
+    document.getElementById('split-info').textContent=`File: ${file.name} — ${state.splitPageCount} pages`;
+    document.getElementById('split-to').value=state.splitPageCount;
+    document.getElementById('split-controls').style.display='block';
+    document.getElementById('split-status').style.display='none';
+  } catch(e){ setStatus('split-status','❌ '+e.message,'err'); }
+}
+function splitModeChange() {
+  const range=document.getElementById('split-mode').value==='range';
+  document.getElementById('split-range-fields').style.display=range?'block':'none';
+}
+async function doSplit() {
+  if(!window._splitFile) return;
+  setStatus('split-status','⏳ Splitting…','info');
+  try {
+    const {PDFDocument}=await getPdfLib();
+    const buf=await readAsArrayBuffer(window._splitFile);
+    const src=await PDFDocument.load(buf);
+    const mode=document.getElementById('split-mode').value;
+    if(mode==='all'){
+      for(let i=0;i<src.getPageCount();i++){
+        const doc=await PDFDocument.create();
+        const [page]=await doc.copyPages(src,[i]);
+        doc.addPage(page);
+        const bytes=await doc.save();
+        await new Promise(r=>setTimeout(r,300));
+        dlBlob(new Blob([bytes],{type:'application/pdf'}),`page_${i+1}.pdf`);
+      }
+      setStatus('split-status',`✅ ${src.getPageCount()} pages downloaded!`,'ok');
+    } else {
+      const from=parseInt(document.getElementById('split-from').value)-1;
+      const to=parseInt(document.getElementById('split-to').value)-1;
+      const doc=await PDFDocument.create();
+      const indices=[];
+      for(let i=from;i<=Math.min(to,src.getPageCount()-1);i++) indices.push(i);
+      const pages=await doc.copyPages(src,indices);
+      pages.forEach(p=>doc.addPage(p));
+      const bytes=await doc.save();
+      dlBlob(new Blob([bytes],{type:'application/pdf'}),`pages_${from+1}_to_${to+1}.pdf`);
+      setStatus('split-status',`✅ Pages ${from+1}–${to+1} downloaded!`,'ok');
+    }
+  } catch(e){ setStatus('split-status','❌ '+e.message,'err'); }
+}
+
+// ─── COMPRESS PDF ─────────────────────────────────────────────────────────────
+function compPdfLoad(input) {
+  const file=input.files[0]; if(!file) return;
+  state.compPdfFile=file;
+  document.getElementById('compresspdf-controls').style.display='block';
+  setStatus('compresspdf-status',`Loaded: ${file.name} (${fmtBytes(file.size)})`, 'info');
+}
+async function doCompressPdf() {
+  if(!state.compPdfFile) return;
+  setStatus('compresspdf-status','⏳ Compressing (re-rendering pages)…','info');
+  try {
+    const scale=parseFloat(document.getElementById('cpdf-scale').value);
+    const quality=parseInt(document.getElementById('cpdf-quality').value)/100;
+    const pdfjs=await getPdfJs();
+    const jsPDF=await getJsPDF();
+    const buf=await readAsArrayBuffer(state.compPdfFile);
+    const src=await pdfjs.getDocument({data:buf}).promise;
+    const first=await src.getPage(1);
+    const vp0=first.getViewport({scale:1});
+    const orient=vp0.width>vp0.height?'landscape':'portrait';
+    const pdf=new jsPDF({orientation:orient,unit:'pt',format:[vp0.width,vp0.height]});
+    let isFirst=true;
+    for(let i=1;i<=src.numPages;i++){
+      const page=await src.getPage(i);
+      const vp=page.getViewport({scale});
+      const c=document.createElement('canvas'); c.width=vp.width; c.height=vp.height;
+      await page.render({canvasContext:c.getContext('2d'),viewport:vp}).promise;
+      const imgData=c.toDataURL('image/jpeg',quality);
+      const pvp=page.getViewport({scale:1});
+      if(!isFirst) pdf.addPage([pvp.width,pvp.height],pvp.width>pvp.height?'landscape':'portrait');
+      pdf.addImage(imgData,'JPEG',0,0,pvp.width,pvp.height);
+      isFirst=false;
+    }
+    pdf.save('compressed.pdf');
+    setStatus('compresspdf-status','✅ Compressed PDF downloaded!','ok');
+  } catch(e){ setStatus('compresspdf-status','❌ '+e.message,'err'); }
+}
+
+// ─── BULK RENAME ──────────────────────────────────────────────────────────────
+function renameLoad(input) {
+  state.renameFiles=Array.from(input.files);
+  if(!state.renameFiles.length) return;
+  document.getElementById('rename-controls').style.display='block';
+  updateRenamePreview();
+}
+function updateRenamePreview() {
+  const prefix=document.getElementById('rename-prefix').value||'file_';
+  const start=parseInt(document.getElementById('rename-start').value)||1;
+  const pad=parseInt(document.getElementById('rename-pad').value)||3;
+  let html='<b>Preview:</b><br>';
+  state.renameFiles.slice(0,5).forEach((f,i)=>{
+    const ext=f.name.includes('.')?'.'+f.name.split('.').pop():'';
+    const num=String(start+i).padStart(pad,'0');
+    html+=`${f.name} → <b>${prefix}${num}${ext}</b><br>`;
+  });
+  if(state.renameFiles.length>5) html+=`…and ${state.renameFiles.length-5} more files`;
+  document.getElementById('rename-preview').innerHTML=html;
+}
+document.addEventListener('input',e=>{if(['rename-prefix','rename-start','rename-pad'].includes(e.target.id))updateRenamePreview();});
+async function doRename() {
+  if(!state.renameFiles.length) return;
+  setStatus('rename-status','⏳ Creating ZIP…','info');
+  try {
+    const JSZip=await getJSZip();
+    const zip=new JSZip();
+    const prefix=document.getElementById('rename-prefix').value||'file_';
+    const start=parseInt(document.getElementById('rename-start').value)||1;
+    const pad=parseInt(document.getElementById('rename-pad').value)||3;
+    for(let i=0;i<state.renameFiles.length;i++){
+      const f=state.renameFiles[i];
+      const ext=f.name.includes('.')?'.'+f.name.split('.').pop():'';
+      const num=String(start+i).padStart(pad,'0');
+      zip.file(prefix+num+ext,f);
+    }
+    const blob=await zip.generateAsync({type:'blob'});
+    dlBlob(blob,'renamed-files.zip');
+    setStatus('rename-status',`✅ ZIP with ${state.renameFiles.length} renamed files downloaded!`,'ok');
+  } catch(e){ setStatus('rename-status','❌ '+e.message,'err'); }
+}
+
+// ─── SCREEN CAPTURE ───────────────────────────────────────────────────────────
+async function doScreenCapture() {
+  setStatus('screenshot-status','','info'); document.getElementById('screenshot-status').style.display='none';
+  try {
+    const stream=await navigator.mediaDevices.getDisplayMedia({video:true,audio:false});
+    const video=document.createElement('video');
+    video.srcObject=stream; video.play();
+    await new Promise(r=>video.onloadedmetadata=r);
+    const c=document.createElement('canvas'); c.width=video.videoWidth; c.height=video.videoHeight;
+    c.getContext('2d').drawImage(video,0,0);
+    stream.getTracks().forEach(t=>t.stop());
+    const url=c.toDataURL('image/png');
+    state.screenshotData=url;
+    document.getElementById('screenshot-out').src=url;
+    document.getElementById('screenshot-result').style.display='block';
+    setStatus('screenshot-status','✅ Screenshot captured! Click Download PNG.','ok');
+  } catch(e){
+    if(e.name!=='AbortError') setStatus('screenshot-status','❌ '+e.message,'err');
+  }
+}
+function screenshotDownload() {
+  if(state.screenshotData) dlDataURL(state.screenshotData,'screenshot.png');
+}
+</script>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(()=>console.log('SW registered'))
+      .catch(e=>console.log('SW error',e));
+  });
+}
+</script>
+</body>
+</html>
